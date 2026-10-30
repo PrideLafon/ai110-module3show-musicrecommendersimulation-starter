@@ -1,6 +1,6 @@
 import csv
 from typing import List, Dict, Tuple, Optional
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 @dataclass
 class Song:
@@ -34,6 +34,18 @@ class UserProfile:
     favorite_mood: str
     target_energy: float
     likes_acoustic: bool
+    target_danceability: Optional[float] = None
+
+    def to_prefs(self) -> Dict:
+        """Convert the profile to the dict format score_song expects."""
+        prefs = {
+            "genre": self.favorite_genre,
+            "mood": self.favorite_mood,
+            "energy": self.target_energy,
+        }
+        if self.target_danceability is not None:
+            prefs["danceability"] = self.target_danceability
+        return prefs
 
 class Recommender:
     """
@@ -44,12 +56,17 @@ class Recommender:
         self.songs = songs
 
     def recommend(self, user: UserProfile, k: int = 5) -> List[Song]:
-        # TODO: Implement recommendation logic
-        return self.songs[:k]
+        """Return the top k Song objects for this user."""
+        by_id = {song.id: song for song in self.songs}
+        ranked = recommend_songs(
+            user.to_prefs(), [asdict(s) for s in self.songs], k=k
+        )
+        return [by_id[song["id"]] for song, _, _ in ranked]
 
     def explain_recommendation(self, user: UserProfile, song: Song) -> str:
-        # TODO: Implement explanation logic
-        return "Explanation placeholder"
+        """Explain in text why this song fits this user."""
+        _, reasons = score_song(user.to_prefs(), asdict(song))
+        return "; ".join(reasons) or "weak match: no overlap"
 
 def load_songs(csv_path: str) -> List[Dict]:
     """Load songs from a CSV file as dictionaries with typed values."""

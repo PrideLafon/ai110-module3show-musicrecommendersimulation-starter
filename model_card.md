@@ -19,18 +19,30 @@ Prompts:
 
 ---
 
-## 3. How the Model Works  
+## 3. How the Model Works
 
-Explain your scoring approach in simple language.  
+The recommender gives every song a score for one listener, then shows the
+songs with the highest scores.
 
-Prompts:  
+A listener is described by a few target values: a favorite genre, a favorite
+mood, and how energetic (0 to 1) and danceable (0 to 1) they want their music
+to be. For each song, the system adds up points:
 
-- What features of each song are used (genre, energy, mood, etc.)  
-- What user preferences are considered  
-- How does the model turn those into a score  
-- What changes did you make from the starter logic  
+- **Genre:** 2.0 points if the song's genre is exactly the listener's genre.
+- **Mood:** 1.0 point if the mood matches exactly.
+- **Energy:** up to 1.5 points. A song gets all 1.5 if its energy is exactly
+  the target, and fewer points the further away it is, in either direction.
+- **Danceability:** up to 1.0 point, scored the same "closer is better" way.
 
-Avoid code here. Pretend you are explaining the idea to a friend who does not program.
+Then the songs are sorted from highest to lowest score and the top few are
+returned, each with a short list of reasons showing where its points came
+from. This is content-based filtering: it only looks at song attributes and
+the listener's targets, never at what other listeners do.
+
+Changes from the starter: the starter code was empty, so everything here is
+new. The scoring recipe is genre 2.0, mood 1.0, energy 1.5, danceability 1.0.
+The profile also has a "likes acoustic" setting, but this version does not
+score it yet.
 
 ---
 
