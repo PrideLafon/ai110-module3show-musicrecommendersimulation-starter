@@ -75,20 +75,56 @@ def load_songs(csv_path: str) -> List[Dict]:
             })
     return songs
 
-def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
-    """
-    Scores a single song against user preferences.
-    Required by recommend_songs() and src/main.py
-    """
-    # TODO: Implement scoring logic using your Algorithm Recipe from Phase 2.
-    # Expected return format: (score, reasons)
-    return []
+WEIGHTS = {
+    "genre": 2.0,
+    "mood": 1.0,
+    "energy": 1.5,
+    "danceability": 1.0,
+}
 
-def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tuple[Dict, float, str]]:
-    """
-    Functional implementation of the recommendation logic.
-    Required by src/main.py
-    """
-    # TODO: Implement scoring and ranking logic
-    # Expected return format: (song_dict, score, explanation)
-    return []
+
+def closeness(value: float, target: float) -> float:
+    """Return similarity: 1.0 if identical, falling to 0.0 if far apart."""
+    return max(0.0, 1.0 - abs(value - target))
+
+
+def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
+    """Score one song against user preferences; return (score, reasons)."""
+    score = 0.0
+    reasons = []
+
+    if song["genre"] == user_prefs.get("genre"):
+        score += WEIGHTS["genre"]
+        reasons.append(
+            f"genre match: {song['genre']} (+{WEIGHTS['genre']:.2f})"
+        )
+    if song["mood"] == user_prefs.get("mood"):
+        score += WEIGHTS["mood"]
+        reasons.append(
+            f"mood match: {song['mood']} (+{WEIGHTS['mood']:.2f})"
+        )
+
+    for feature in ("energy", "danceability"):
+        if feature not in user_prefs:
+            continue
+        similarity = closeness(song[feature], user_prefs[feature])
+        points = WEIGHTS[feature] * similarity
+        score += points
+        reasons.append(
+            f"{feature} {song[feature]} vs target "
+            f"{user_prefs[feature]} (+{points:.2f})"
+        )
+
+    return round(score, 4), reasons
+
+def recommend_songs(
+    user_prefs: Dict, songs: List[Dict], k: int = 5
+) -> List[Tuple[Dict, float, str]]:
+    """Rank all songs for a user and return the top k with explanations."""
+    scored = []
+    for song in songs:
+        score, reasons = score_song(user_prefs, song)
+        scored.append((song, score, "; ".join(reasons)))
+
+    ranked = sorted(scored, key=lambda item: (-item[1], item[0]["id"]))
+    return ranked[:k]
