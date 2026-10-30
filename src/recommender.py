@@ -1,3 +1,4 @@
+import csv
 from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass
 
@@ -17,6 +18,11 @@ class Song:
     valence: float
     danceability: float
     acousticness: float
+    popularity: int = 50
+    release_decade: int = 2020
+    mood_tags: Optional[List[str]] = None
+    language: str = "english"
+    instrumentalness: float = 0.0
 
 @dataclass
 class UserProfile:
@@ -46,13 +52,28 @@ class Recommender:
         return "Explanation placeholder"
 
 def load_songs(csv_path: str) -> List[Dict]:
-    """
-    Loads songs from a CSV file.
-    Required by src/main.py
-    """
-    # TODO: Implement CSV loading logic
-    print(f"Loading songs from {csv_path}...")
-    return []
+    """Load songs from a CSV file as dictionaries with typed values."""
+    songs = []
+    with open(csv_path, newline="", encoding="utf-8") as file:
+        for row in csv.DictReader(file):
+            songs.append({
+                "id": int(row["id"]),
+                "title": row["title"],
+                "artist": row["artist"],
+                "genre": row["genre"],
+                "mood": row["mood"],
+                "energy": float(row["energy"]),
+                "tempo_bpm": float(row["tempo_bpm"]),
+                "valence": float(row["valence"]),
+                "danceability": float(row["danceability"]),
+                "acousticness": float(row["acousticness"]),
+                "popularity": int(row["popularity"]),
+                "release_decade": int(row["release_decade"]),
+                "mood_tags": row["mood_tags"].split("|"),
+                "language": row["language"],
+                "instrumentalness": float(row["instrumentalness"]),
+            })
+    return songs
 
 def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
     """
