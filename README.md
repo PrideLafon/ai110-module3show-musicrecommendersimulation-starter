@@ -6,13 +6,12 @@ In this project you will build and explain a small music recommender system.
 
 Your goal is to:
 
-- Represent songs and a user "taste profile" as data
-- Design a scoring rule that turns that data into recommendations
-- Evaluate what your system gets right and wrong
-- Reflect on how this mirrors real world AI recommenders
-
-Replace this paragraph with your own summary of what your version does.
-
+This project is a small, explainable **content-based music recommender**. It
+loads a 24-song catalog from a CSV file, compares each song to a listener's
+taste profile (favorite genre, favorite mood, target energy and danceability),
+gives every song a weighted score, and returns the top matches with the
+reasons behind each score. It runs from the command line and is tested with
+five user profiles, including two adversarial ones.
 ---
 
 ## How The System Works
@@ -156,23 +155,43 @@ Preferences: {'genre': 'pop', 'mood': 'happy', 'energy': 0.8}
 
 Use this section to document the experiments you ran. For example:
 
-- What happened when you changed the weight on genre from 2.0 to 0.5
-- What happened when you added tempo or valence to the score
-- How did your system behave for different types of users
+## Experiments You Tried
 
+**Experiment: weight shift.** I halved the genre weight (2.0 to 1.0) and
+doubled the energy weight (1.5 to 3.0), then re-ran all five profiles.
+
+| Profile | What changed |
+|---|---|
+| High-Energy Pop | Soleil de Minuit (sad, slow) fell out of the top 5. Golden Hour Groove rose from #4 to #2 and Rooftop Lights from #5 to #4. |
+| Chill Lofi | Same top 5 in the same order. Only the scores changed. |
+| Deep Intense Rock | Same top 4. Sunrise City was replaced at #5 by Pulse Cathedral, a high-energy EDM song. |
+| Sad But Hyper | Soleil de Minuit stayed #1 but only narrowly (4.63 vs 4.53). Slots 4 and 5 changed from quiet sad songs to loud rock songs. |
+| Unknown Genre | Fuego en la Calle moved from #5 to #4, swapping with Gym Hero. |
+
+**Result:** the change made recommendations *more accurate* for the pop and
+"sad but hyper" listeners, because songs that only matched on the genre label
+dropped, and *only different* for lofi and rock, whose top results barely
+moved. The new maximum score is 6.0, so the math stays valid.
+
+Other tests: five profiles (High-Energy Pop, Chill Lofi, Deep Intense Rock,
+and two adversarial ones) are compared in `model_card.md`.
 ---
 
 ## Limitations and Risks
 
 Summarize some limitations of your recommender.
 
-Examples:
+## Limitations and Risks
 
-- It only works on a tiny catalog
-- It does not understand lyrics or language
-- It might over favor one genre or mood
+- It only works on a tiny, synthetic 24-song catalog, so some genres (such as
+  rock) run out of songs after one or two results.
+- Genre is an exact text match, so "indie pop" gets no credit for a "pop" fan.
+- A large gap in energy is only gently penalized, so a slow, sad song can win
+  for a listener who asked for very high energy.
+- It does not understand lyrics, language, or listening history, and it only
+  scores four of the 15 columns in the data.
 
-You will go deeper on this in your model card.
+See `model_card.md` for details.
 
 ---
 
@@ -180,12 +199,22 @@ You will go deeper on this in your model card.
 
 Read and complete `model_card.md`:
 
+## Reflection
+
+Read and complete `model_card.md`:
+
 [**Model Card**](model_card.md)
 
-Write 1 to 2 paragraphs here about what you learned:
+Building this showed me that a recommender is just data, a scoring rule and
+a sort. The part that makes it feel intelligent is the list of reasons shown
+with each result. I also learned that the weights are decisions about what
+matters: with genre worth the most, a slow sad pop song ranked first for a
+listener who asked for very high energy, because the label matched.
 
-- about how recommenders turn data into predictions
-- about where bias or unfairness could show up in systems like this
-
+Bias showed up in small, concrete ways: one song (Gym Hero) appeared in the
+top 5 for four of my five profiles, not because of one weight but because the
+catalog is small and its numbers sit close to any high-energy target. In a
+real platform, the same effect could mean a few popular items crowd out
+everything else, and small genres get worse results than big ones.
 
 
