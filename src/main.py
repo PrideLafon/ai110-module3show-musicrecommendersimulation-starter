@@ -5,7 +5,26 @@ from typing import Dict, List
 from src.recommender import load_songs, recommend_songs
 
 PROFILES: Dict[str, Dict] = {
-    "Default Pop/Happy": {"genre": "pop", "mood": "happy", "energy": 0.8},
+    "High-Energy Pop": {
+        "genre": "pop", "mood": "happy",
+        "energy": 0.85, "danceability": 0.85,
+    },
+    "Chill Lofi": {
+        "genre": "lofi", "mood": "chill",
+        "energy": 0.38, "danceability": 0.60,
+    },
+    "Deep Intense Rock": {
+        "genre": "rock", "mood": "intense",
+        "energy": 0.92, "danceability": 0.60,
+    },
+    "ADVERSARIAL: Sad But Hyper": {
+        "genre": "pop", "mood": "sad",
+        "energy": 0.90, "danceability": 0.50,
+    },
+    "ADVERSARIAL: Unknown Genre": {
+        "genre": "k-pop", "mood": "happy",
+        "energy": 0.88, "danceability": 0.85,
+    },
 }
 
 
