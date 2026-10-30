@@ -65,11 +65,16 @@ a 0.82 song should beat a 0.93 song.
 
 ### Expected biases
 
-- Genre is worth the most points, so a great mood and energy match in a
-  different genre can lose to a weaker song with the right genre label.
-- Genre is an exact match, so "indie pop" gets nothing for a "pop" fan.
-- With a small catalog, genres with only one or two songs will fill the
-  top results with filler once they run out.
+- **Genre outweighs everything else.** Genre is worth up to 2.0 points, so
+  in a hand-run test a slow, sad pop song (energy 0.45) ranked #3 for a
+  happy, high-energy pop fan, above a happy afrobeats song with almost
+  exactly the right energy, only because its genre label said "pop".
+- **Exact-match genre is blunt.** "Indie pop" earns nothing for a "pop" fan.
+- **Small catalog.** Rock has only two songs, so after those two, the top
+  results fill with songs that match only on mood or energy.
+- **Danceability adds little here.** In a hand-run test it separated
+  chill lofi from intense rock by only about 0.04 points; energy did the
+  work. I plan to test removing it.
 
 ---
 
