@@ -86,3 +86,25 @@ def test_unknown_mode_raises_clear_error():
     songs = load_songs(str(DATA))
     with pytest.raises(ValueError):
         recommend_songs({"genre": "pop"}, songs, k=3, mode="nope")
+
+
+LOFI = {"genre": "lofi", "mood": "chill",
+        "energy": 0.38, "danceability": 0.60}
+
+
+def test_diversity_pushes_down_a_repeated_artist():
+    songs = load_songs(str(DATA))
+    plain = [s["title"] for s, _, _ in recommend_songs(LOFI, songs, 5)]
+    diverse = [
+        s["title"]
+        for s, _, _ in recommend_songs(LOFI, songs, 5, diversity=True)
+    ]
+    assert plain[0] == diverse[0]  # the best match is never penalized
+    assert diverse.index("Focus Flow") > plain.index("Focus Flow")
+
+
+def test_diversity_explains_its_penalty():
+    songs = load_songs(str(DATA))
+    results = recommend_songs(LOFI, songs, 5, diversity=True)
+    focus = [why for s, _, why in results if s["title"] == "Focus Flow"][0]
+    assert "diversity: artist already listed" in focus

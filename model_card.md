@@ -88,6 +88,25 @@ lists than listeners who like small ones.
 
 ---
 
+### Diversity penalty (stretch feature)
+
+With `--diversity`, the system picks songs one at a time and subtracts points
+from a song if its artist (-1.00 each) or genre (-0.50 each) is already in
+the list. The best match is never penalized, and each penalty is shown in the
+reasons column.
+
+How it helps fairness: without it, a catalog with several songs by one
+artist can fill the top results with near-copies. For the Chill Lofi listener,
+the second LoRoom song (Focus Flow) fell from #3 to #4 and Spacewalk Thoughts
+(a different artist and genre) moved up. For the pop listener, the sad song
+Soleil de Minuit fell from #3 to #5, below two happy songs.
+
+Trade-offs I noticed: the genre penalty also hurts listeners who really do
+want one genre. The Deep Intense Rock profile lost 0.50 points on its second
+rock song just for being rock. The penalty is also soft, so Focus Flow still
+stayed in the lofi top 5, because the catalog has few lofi alternatives. A
+smaller genre penalty or an artist-only penalty would be a fairer default.
+
 ## 7. Evaluation
 
 I tested five profiles: High-Energy Pop, Chill Lofi, Deep Intense Rock, and two

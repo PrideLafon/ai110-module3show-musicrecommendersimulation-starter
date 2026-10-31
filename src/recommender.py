@@ -156,15 +156,58 @@ def score_song(
     return round(score, 4), reasons
 
 
+ARTIST_PENALTY = 1.0
+GENRE_PENALTY = 0.5
+
+
+def diversity_penalty(
+    song: Dict, chosen: List[Tuple[Dict, float, List[str]]]
+) -> Tuple[float, List[str]]:
+    """Return a penalty (and reasons) for repeating an artist or genre."""
+    artist_repeats = sum(1 for s, _, _ in chosen
+                         if s["artist"] == song["artist"])
+    genre_repeats = sum(1 for s, _, _ in chosen
+                        if s["genre"] == song["genre"])
+    penalty = 0.0
+    reasons = []
+    if artist_repeats:
+        amount = ARTIST_PENALTY * artist_repeats
+        penalty += amount
+        reasons.append(f"diversity: artist already listed (-{amount:.2f})")
+    if genre_repeats:
+        amount = GENRE_PENALTY * genre_repeats
+        penalty += amount
+        reasons.append(f"diversity: genre already listed (-{amount:.2f})")
+    return penalty, reasons
+
+
+def pick_diverse(
+    scored: List[Tuple[Dict, float, List[str]]], k: int
+) -> List[Tuple[Dict, float, List[str]]]:
+    """Pick k songs one at a time, penalizing repeated artists/genres."""
+    pool = list(scored)
+    chosen = []
+    while pool and len(chosen) < k:
+        options = []
+        for song, base_score, reasons in pool:
+            penalty, extra = diversity_penalty(song, chosen)
+            options.append((base_score - penalty, song, reasons + extra))
+        best = max(options, key=lambda o: (o[0], -o[1]["id"]))
+        chosen.append((best[1], round(best[0], 4), best[2]))
+        pool = [item for item in pool if item[0]["id"] != best[1]["id"]]
+    return chosen
+
+
 def recommend_songs(
     user_prefs: Dict, songs: List[Dict], k: int = 5,
-    mode: str = DEFAULT_MODE,
+    mode: str = DEFAULT_MODE, diversity: bool = False,
 ) -> List[Tuple[Dict, float, str]]:
     """Rank all songs for a user and return the top k with explanations."""
     scored = []
     for song in songs:
         score, reasons = score_song(user_prefs, song, mode)
-        scored.append((song, score, "; ".join(reasons)))
+        scored.append((song, score, reasons))
 
     ranked = sorted(scored, key=lambda item: (-item[1], item[0]["id"]))
-    return ranked[:k]
+    top = pick_diverse(ranked, k) if diversity else ranked[:k]
+    return [(song, score, "; ".join(why)) for song, score, why in top]

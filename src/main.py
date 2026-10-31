@@ -33,12 +33,15 @@ PROFILES: Dict[str, Dict] = {
 
 def show_recommendations(
     name: str, user_prefs: Dict, songs: List[Dict],
-    mode: str = DEFAULT_MODE, k: int = 5,
+    mode: str = DEFAULT_MODE, diversity: bool = False, k: int = 5,
 ) -> None:
     """Print the top k recommendations for one profile as a table."""
-    print(f"\n=== Profile: {name} | mode: {mode} ===")
+    tag = " + diversity" if diversity else ""
+    print(f"\n=== Profile: {name} | mode: {mode}{tag} ===")
     print(f"Preferences: {user_prefs}\n")
-    results = recommend_songs(user_prefs, songs, k=k, mode=mode)
+    results = recommend_songs(
+        user_prefs, songs, k=k, mode=mode, diversity=diversity
+    )
     rows = []
     for rank, (song, score, explanation) in enumerate(results, start=1):
         reasons = "\n".join(f"- {r}" for r in explanation.split("; "))
@@ -74,6 +77,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="ranking mode (default: balanced)",
     )
     parser.add_argument(
+        "--diversity", action="store_true",
+        help="penalize repeated artists and genres in the top results",
+    )
+    parser.add_argument(
         "--compare", action="store_true",
         help="show every ranking mode side by side",
     )
@@ -89,7 +96,9 @@ def main() -> None:
         if args.compare:
             compare_modes(name, prefs, songs)
         else:
-            show_recommendations(name, prefs, songs, mode=args.mode)
+            show_recommendations(
+                name, prefs, songs, mode=args.mode, diversity=args.diversity
+            )
 
 
 if __name__ == "__main__":
