@@ -64,9 +64,9 @@ popularity over time, and any listening history.
 
 ## 5. Strengths
 
-- It separates very different listeners well. The pop, lofi and rock profiles
-  share no songs in their top 5 except Gym Hero, which shows up for both pop
-  and rock.
+- It separates very different listeners well. Pop and lofi share no songs in
+  their top 5, and lofi and rock share none either. Pop and rock overlap on
+  only two songs, Gym Hero and Sunrise City, both high-energy pop tracks.
 - Results usually match intuition at #1: Sunrise City for pop, Library Rain for
   lofi, and Storm Runner for rock.
 - Every recommendation comes with reasons that add up exactly to its score, so
@@ -287,8 +287,8 @@ anything else to beat it.
 
 | Pair | What changed and why it makes sense |
 |---|---|
-| Pop vs Lofi | No shared songs. Pop picks energy 0.8+ songs, lofi picks energy 0.35-0.42 songs. |
-| Pop vs Rock | Both want high energy, but pop gets pop/happy and rock gets rock/intense. Gym Hero is the bridge: pop genre for one, intense mood for the other. |
+| Pop vs Lofi | No shared songs. Pop's top 5 are mostly energy 0.76-0.93 songs (one slow outlier, Soleil de Minuit at 0.45); lofi's are all 0.28-0.42. |
+| Pop vs Rock | Both want high energy, but pop gets pop/happy songs and rock gets rock/intense ones. They share two songs: Gym Hero (pop genre for one, intense mood for the other) and Sunrise City (#1 for pop, only #5 for rock, on energy and danceability alone). |
 | Pop vs Sad But Hyper | Both want pop. Soleil de Minuit jumps from #3 to #1 because the sad mood now matches. |
 | Pop vs Unknown Genre | Both want happy, high energy. Without a genre match, the top 3 are simply the three happy songs. |
 | Lofi vs Rock | Opposites, with no overlap. Lofi's top results have energy 0.35-0.42 and rock's have 0.88-0.91. |
