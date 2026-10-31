@@ -1,5 +1,6 @@
 """Command line runner for the Music Recommender Simulation."""
 
+from tabulate import tabulate
 from typing import Dict, List
 
 from src.recommender import load_songs, recommend_songs
@@ -31,17 +32,23 @@ PROFILES: Dict[str, Dict] = {
 def show_recommendations(
     name: str, user_prefs: Dict, songs: List[Dict], k: int = 5
 ) -> None:
-    """Print the top k recommendations for one taste profile."""
+    """Print the top k recommendations for one profile as a table."""
     print(f"\n=== Profile: {name} ===")
     print(f"Preferences: {user_prefs}\n")
     results = recommend_songs(user_prefs, songs, k=k)
+    rows = []
     for rank, (song, score, explanation) in enumerate(results, start=1):
-        print(f"{rank}. {song['title']} by {song['artist']} "
-              f"[{song['genre']} / {song['mood']}]")
-        print(f"   Score: {score:.2f}")
-        for reason in explanation.split("; "):
-            print(f"   - {reason}")
-        print()
+        reasons = "\n".join(f"- {r}" for r in explanation.split("; "))
+        rows.append([
+            rank,
+            song["title"],
+            song["artist"],
+            f"{song['genre']} / {song['mood']}",
+            f"{score:.2f}",
+            reasons,
+        ])
+    headers = ["#", "Title", "Artist", "Genre / Mood", "Score", "Why"]
+    print(tabulate(rows, headers=headers, tablefmt="grid"))
 
 
 def main() -> None:
