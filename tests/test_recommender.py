@@ -108,3 +108,26 @@ def test_diversity_explains_its_penalty():
     results = recommend_songs(LOFI, songs, 5, diversity=True)
     focus = [why for s, _, why in results if s["title"] == "Focus Flow"][0]
     assert "diversity: artist already listed" in focus
+
+def test_instrumental_preference_favors_instrumental_songs():
+    songs = {s["title"]: s for s in load_songs(str(DATA))}
+    prefs = {"prefers_instrumental": True}
+    rain = score_song(prefs, songs["Library Rain"])[0]
+    gym = score_song(prefs, songs["Gym Hero"])[0]
+    assert rain > gym
+
+
+def test_language_preference_matches_song_language():
+    songs = {s["title"]: s for s in load_songs(str(DATA))}
+    prefs = {"language": "french"}
+    soleil = score_song(prefs, songs["Soleil de Minuit"])[0]
+    sunrise = score_song(prefs, songs["Sunrise City"])[0]
+    assert soleil > sunrise
+
+
+def test_more_shared_mood_tags_scores_higher():
+    songs = {s["title"]: s for s in load_songs(str(DATA))}
+    prefs = {"mood_tags": ["rainy", "study"]}
+    rain = score_song(prefs, songs["Library Rain"])[0]
+    coding = score_song(prefs, songs["Midnight Coding"])[0]
+    assert rain > coding > 0

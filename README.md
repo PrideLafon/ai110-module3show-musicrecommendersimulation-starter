@@ -151,9 +151,6 @@ Preferences: {'genre': 'pop', 'mood': 'happy', 'energy': 0.8}
 
 ---
 
-## Experiments You Tried
-
-Use this section to document the experiments you ran. For example:
 
 ## Experiments You Tried
 
@@ -177,9 +174,6 @@ Other tests: five profiles (High-Energy Pop, Chill Lofi, Deep Intense Rock,
 and two adversarial ones) are compared in `model_card.md`.
 ---
 
-## Limitations and Risks
-
-Summarize some limitations of your recommender.
 
 ## Limitations and Risks
 
@@ -188,8 +182,7 @@ Summarize some limitations of your recommender.
 - Genre is an exact text match, so "indie pop" gets no credit for a "pop" fan.
 - A large gap in energy is only gently penalized, so a slow, sad song can win
   for a listener who asked for very high energy.
-- It does not understand lyrics, language, or listening history, and it only
-  scores four of the 15 columns in the data.
+- Tempo and valence are in the data but not scored; the extra attributes only count when a profile asks for them.
 
 See `model_card.md` for details.
 
@@ -213,4 +206,24 @@ catalog is small and its numbers sit close to any high-energy target. In a
 real platform, the same effect could mean a few popular items crowd out
 everything else, and small genres get worse results than big ones.
 
+## Extra Song Attributes (stretch)
 
+Five attributes were added to `data/songs.csv` beyond the starter's ten
+columns: `popularity` (0-100), `release_decade`, `mood_tags` (several tags
+per song), `language`, and `instrumentalness` (0-1). The scoring also uses
+`acousticness`. These are optional: a feature is scored only when a listener
+profile asks for it, so profiles that don't mention them score exactly as
+before.
+
+| Profile key | Rule | Max points (balanced) |
+|---|---|---|
+| likes_acoustic | acousticness (or 1 - acousticness) | 0.5 |
+| prefers_instrumental | instrumentalness (or 1 - instrumentalness) | 0.5 |
+| popularity | closeness, scale 100 | 0.25 |
+| release_decade | closeness, scale 30 years | 0.25 |
+| mood_tags | share of requested tags the song has | 0.5 |
+| language | exact match | 0.5 |
+
+Example: for a "rainy study session" listener, Library Rain overtakes
+Midnight Coding once the extras are scored (7.04 vs 6.71), because it shares
+both requested tags and is more acoustic.

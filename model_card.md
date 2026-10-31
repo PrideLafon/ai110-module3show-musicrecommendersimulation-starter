@@ -54,12 +54,10 @@ The data is synthetic: the titles and artists are made up, and the numbers
 not measured from real audio.
 
 The catalog has 18 genres, but it is uneven: pop and lofi have 3 songs each,
-rock and hip-hop have 2, and the other 14 genres have 1. The recommender
-scores only genre, mood, energy and danceability. Tempo, valence, acousticness,
-popularity, release decade, mood tags, language and instrumentalness are in the
-file but not used in the score yet. Missing from the data: lyrics, artist
-popularity over time, and any listening history.
-
+rock and hip-hop have 2, and the other 14 genres have 1. The recommender always scores genre, mood, energy and danceability. Six
+optional features (acousticness, instrumentalness, popularity, release
+decade, mood tags and language) are scored only when a listener profile sets
+a preference for them. Tempo and valence are in the file but not used.
 ---
 
 ## 5. Strengths
