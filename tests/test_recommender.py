@@ -1,7 +1,9 @@
 from pathlib import Path
 
-from src.recommender import (Recommender, Song, UserProfile, load_songs,
-                             recommend_songs, score_song)
+import pytest
+
+from src.recommender import (MODES, Recommender, Song, UserProfile,
+                             load_songs, recommend_songs, score_song)
 
 DATA = Path(__file__).resolve().parent.parent / "data" / "songs.csv"
 
@@ -67,3 +69,20 @@ def test_different_profiles_get_different_top_songs():
     lofi = {"genre": "lofi", "mood": "chill", "energy": 0.38}
     assert recommend_songs(pop, songs, 1)[0][0]["genre"] == "pop"
     assert recommend_songs(lofi, songs, 1)[0][0]["genre"] == "lofi"
+
+
+def test_ranking_modes_change_the_order():
+    songs = load_songs(str(DATA))
+    pop = {"genre": "pop", "mood": "happy",
+           "energy": 0.85, "danceability": 0.85}
+    orders = {
+        mode: [s["id"] for s, _, _ in recommend_songs(pop, songs, 5, mode)]
+        for mode in MODES
+    }
+    assert len({tuple(order) for order in orders.values()}) > 1
+
+
+def test_unknown_mode_raises_clear_error():
+    songs = load_songs(str(DATA))
+    with pytest.raises(ValueError):
+        recommend_songs({"genre": "pop"}, songs, k=3, mode="nope")

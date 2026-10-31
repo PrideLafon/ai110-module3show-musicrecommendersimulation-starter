@@ -199,10 +199,6 @@ See `model_card.md` for details.
 
 Read and complete `model_card.md`:
 
-## Reflection
-
-Read and complete `model_card.md`:
-
 [**Model Card**](model_card.md)
 
 Building this showed me that a recommender is just data, a scoring rule and

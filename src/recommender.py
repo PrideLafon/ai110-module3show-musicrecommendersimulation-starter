@@ -92,12 +92,30 @@ def load_songs(csv_path: str) -> List[Dict]:
             })
     return songs
 
-WEIGHTS = {
-    "genre": 2.0,
-    "mood": 1.0,
-    "energy": 1.5,
-    "danceability": 1.0,
+MODES: Dict[str, Dict[str, float]] = {
+    "balanced": {
+        "genre": 2.0, "mood": 1.0, "energy": 1.5, "danceability": 1.0,
+    },
+    "genre_first": {
+        "genre": 4.0, "mood": 1.0, "energy": 1.0, "danceability": 0.5,
+    },
+    "mood_first": {
+        "genre": 1.0, "mood": 3.0, "energy": 1.0, "danceability": 1.0,
+    },
+    "energy_focused": {
+        "genre": 1.0, "mood": 1.0, "energy": 3.0, "danceability": 1.0,
+    },
 }
+DEFAULT_MODE = "balanced"
+
+
+def get_weights(mode: str) -> Dict[str, float]:
+    """Return the weight set (the strategy) for a ranking mode."""
+    if mode not in MODES:
+        raise ValueError(
+            f"Unknown mode '{mode}'. Choose from: {', '.join(MODES)}"
+        )
+    return MODES[mode]
 
 
 def closeness(value: float, target: float) -> float:
@@ -105,27 +123,30 @@ def closeness(value: float, target: float) -> float:
     return max(0.0, 1.0 - abs(value - target))
 
 
-def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
+def score_song(
+    user_prefs: Dict, song: Dict, mode: str = DEFAULT_MODE
+) -> Tuple[float, List[str]]:
     """Score one song against user preferences; return (score, reasons)."""
+    weights = get_weights(mode)
     score = 0.0
     reasons = []
 
     if song["genre"] == user_prefs.get("genre"):
-        score += WEIGHTS["genre"]
+        score += weights["genre"]
         reasons.append(
-            f"genre match: {song['genre']} (+{WEIGHTS['genre']:.2f})"
+            f"genre match: {song['genre']} (+{weights['genre']:.2f})"
         )
     if song["mood"] == user_prefs.get("mood"):
-        score += WEIGHTS["mood"]
+        score += weights["mood"]
         reasons.append(
-            f"mood match: {song['mood']} (+{WEIGHTS['mood']:.2f})"
+            f"mood match: {song['mood']} (+{weights['mood']:.2f})"
         )
 
     for feature in ("energy", "danceability"):
         if feature not in user_prefs:
             continue
         similarity = closeness(song[feature], user_prefs[feature])
-        points = WEIGHTS[feature] * similarity
+        points = weights[feature] * similarity
         score += points
         reasons.append(
             f"{feature} {song[feature]} vs target "
@@ -134,13 +155,15 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
 
     return round(score, 4), reasons
 
+
 def recommend_songs(
-    user_prefs: Dict, songs: List[Dict], k: int = 5
+    user_prefs: Dict, songs: List[Dict], k: int = 5,
+    mode: str = DEFAULT_MODE,
 ) -> List[Tuple[Dict, float, str]]:
     """Rank all songs for a user and return the top k with explanations."""
     scored = []
     for song in songs:
-        score, reasons = score_song(user_prefs, song)
+        score, reasons = score_song(user_prefs, song, mode)
         scored.append((song, score, "; ".join(reasons)))
 
     ranked = sorted(scored, key=lambda item: (-item[1], item[0]["id"]))
